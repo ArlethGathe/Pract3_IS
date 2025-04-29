@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Mapa de Sismos (Administrador)</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/estilos.css">
+
+    <style>
+        #map {
+            height: 90vh;
+            width: 100%;
+        }
+    </style>
+</head>
+<body th:data-theme="${tema}">
+    <h2 style="text-align: center;">Sismos en México (Vista Administrador)</h2>
+
+    <!-- 📋 Formulario de filtros mejorado y centrado -->
+    <form th:action="@{/admin/mapa}" method="get" class="container mb-4">
+        <div class="row justify-content-center g-3">
+            <div class="col-md-3">
+                <label for="fecha" class="form-label">Fecha</label>
+                <input type="date" id="fecha" name="fecha" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label for="hora" class="form-label">Hora</label>
+                <input type="time" id="hora" name="hora" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label for="magnitud" class="form-label">Magnitud mínima</label>
+                <input type="number" step="0.1" id="magnitud" name="magnitud" class="form-control" placeholder="Ej. 4.5" />
+            </div>
+            <div class="col-md-3">
+                <label for="profundidad" class="form-label">Profundidad máxima (km)</label>
+                <input type="number" step="0.1" id="profundidad" name="profundidad" class="form-control" placeholder="Ej. 70" />
+            </div>
+        </div>
+
+        <div class="row justify-content-center mt-3">
+            <div class="col-md-3 text-center">
+                <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+            </div>
+        </div>
+    </form>
+
+
+    <!-- Mapa -->
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script th:inline="javascript">
+        const sismos = /*[[${sismos}]]*/ [];
+
+        const map = L.map('map').setView([23.6345, -102.5528], 5);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        sismos.forEach(sismo => {
+            const marcador = L.marker([sismo.latitud, sismo.longitud]).addTo(map);
+
+            marcador.bindPopup(
+                `<b>Zona:</b> ${sismo.zona}<br/>
+                <b>Fecha:</b> ${sismo.fecha}<br/>
+                <b>Hora:</b> ${sismo.hora}<br/>
+                <b>Magnitud:</b> ${sismo.magnitud}<br/>
+                <b>Profundidad:</b> ${sismo.profundidad} km<br/>
+                <a href="/admin/sismos-crud/mapa/descargar-pdf/${sismo.id}" class="btn btn-primary btn-sm mt-2" target="_blank">📄 Descargar PDF</a>`
+            );
+
+        });
+    </script>
+</body>
+</html>
